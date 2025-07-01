@@ -1,0 +1,26 @@
+{
+    "name": "tomas/eloquent-model-generator-11",
+    "description": "Generador de modelos Eloquent desde base de datos (Laravel 11)",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Tomi\\ModelGenerator\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Tomás"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Tomi\\ModelGenerator\\ModelGeneratorServiceProvider"
+            ]
+        }
+    }
+}
