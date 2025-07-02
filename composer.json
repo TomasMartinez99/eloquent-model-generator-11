@@ -1,5 +1,6 @@
 {
-    "name": "tomas/eloquent-model-generator-11",
+    "name": "tomi/eloquent-model-generator-11",
+    "version": "dev-main",
     "description": "Generador de modelos Eloquent desde base de datos (Laravel 11)",
     "type": "library",
     "license": "MIT",

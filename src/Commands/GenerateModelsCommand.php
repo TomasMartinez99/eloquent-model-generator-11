@@ -21,12 +21,12 @@ class GenerateModelsCommand extends Command
         $only = $this->option('only');
         $customPath = base_path($this->option('path'));
 
-        // Verifica si la ruta personalizada existe, si no, la crea
+        // Crea la carpeta de destino si no existe
         if (!is_dir($customPath)) {
             mkdir($customPath, 0755, true);
         }
 
-        // Si se pasa --only, procesamos solo esa tabla. Si no, procesamos todas las tablas de la base.
+        // Si se usa --only, genera el modelo solo para esa tabla. Si no, recorre todas las tablas.
         $tables = $only
             ? [ (object)[ 'name' => $only ] ]
             : collect(DB::select('SHOW TABLES'))->map(function ($obj) {
@@ -38,9 +38,10 @@ class GenerateModelsCommand extends Command
             // Muestra el nombre de la tabla que está procesando
             $this->info("📄 Procesando tabla: $table");
 
+            // Construye el contenido del modelo
             $columns = Schema::getColumnListing($table);
             $className = Str::studly(Str::singular($table));
-            $namespace = str_replace('/', '\\', trim($this->option('path'), '/'));
+            $namespace = 'App\\Models';
             $modelCode = "<?php\n\n";
             $modelCode .= "namespace $namespace;\n\n";
             $modelCode .= "use Illuminate\\Database\\Eloquent\\Model;\n\n";
@@ -48,12 +49,13 @@ class GenerateModelsCommand extends Command
             $modelCode .= "    protected \$table = '$table';\n";
             $modelCode .= "    protected \$fillable = [\n";
 
+            // Agrega todas las columnas al array $fillable
             foreach ($columns as $column) {
                 $modelCode .= "        '$column',\n";
             }
             $modelCode .= "    ];\n";
 
-            // Relaciones belongsTo (detectadas desde claves foráneas)
+            // Añade métodos belongsTo para cada clave foránea encontrada
             $foreignKeys = DB::select("
                 SELECT column_name, referenced_table_name
                 FROM information_schema.key_column_usage
@@ -76,11 +78,13 @@ class GenerateModelsCommand extends Command
 
             $filePath = "$customPath/$className.php";
 
+            // Evita sobrescribir modelos existentes
             if (file_exists($filePath)) {
                 $this->warn("⚠️  Modelo $className ya existe. Saltando...");
                 continue;
             }
 
+            // Guarda el modelo en el archivo correspondiente
             file_put_contents($filePath, $modelCode);
         }
 
